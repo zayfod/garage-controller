@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+# Redirect TCP connections on port 80 to localhost:8000, where the application is listening
+sysctl -w net.ipv4.conf.eth0.route_localnet=1
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 127.0.0.1:8000
+
+# Find the application directory
+SCRIPT_SPEC=`realpath $0`
+DIR=`dirname $SCRIPT_SPEC`
+
+# Start the application
+sudo -u pi python "$DIR/garage.py" &
